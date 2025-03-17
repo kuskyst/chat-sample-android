@@ -4,4 +4,10 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class ChatApplication : Application()
+class ChatApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        val dexOutputDir = codeCacheDir
+        dexOutputDir.setReadOnly()
+    }
+}
