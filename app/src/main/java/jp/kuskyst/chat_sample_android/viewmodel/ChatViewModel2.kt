@@ -43,7 +43,6 @@ class ChatViewModel2 @Inject constructor(
                     is WebSocket.Event.OnMessageReceived -> {
                         val text = event.message as Message.Text
                         if (!text.value.contains("\"")) {
-                            Log.d("ChatViewModel", "Received message: $text.value")
                             _messages.update { currentMessages ->
                                 currentMessages + ChatMessage(text.value, false)
                             }
