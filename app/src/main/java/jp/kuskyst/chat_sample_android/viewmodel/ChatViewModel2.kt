@@ -3,6 +3,7 @@ package jp.kuskyst.chat_sample_android.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tinder.scarlet.Message
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.disposables.CompositeDisposable
@@ -40,13 +41,11 @@ class ChatViewModel2 @Inject constructor(
             .subscribe { event ->
                 when (event) {
                     is WebSocket.Event.OnMessageReceived -> {
-                        if (!event.message.toString().contains("\"")) {
-                            val message = event.message.toString()
-                                .replace("Text(value=", "")
-                                .replace(")", "")
-                            Log.d("ChatViewModel", "Received message: $message")
+                        val text = event.message as Message.Text
+                        if (!text.value.contains("\"")) {
+                            Log.d("ChatViewModel", "Received message: $text.value")
                             _messages.update { currentMessages ->
-                                currentMessages + ChatMessage(message, false)
+                                currentMessages + ChatMessage(text.value, false)
                             }
                         }
                     }
@@ -61,7 +60,6 @@ class ChatViewModel2 @Inject constructor(
         val subscription = chatService.observeMessages()
             .subscribe(
                 { message ->
-                    Log.d("----", message)
                     _messages.update { currentMessages ->
                         currentMessages + ChatMessage(message, true)
                     }
