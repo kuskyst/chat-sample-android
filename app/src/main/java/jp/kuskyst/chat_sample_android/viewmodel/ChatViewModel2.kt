@@ -32,6 +32,9 @@ class ChatViewModel2 @Inject constructor(
 
     fun sendMessage(text: String) {
         if (text.isNotBlank()) {
+            _messages.update { currentMessages ->
+                currentMessages + ChatMessage(text, true)
+            }
             chatService.sendMessage(text)
         }
     }
@@ -42,9 +45,10 @@ class ChatViewModel2 @Inject constructor(
                 when (event) {
                     is WebSocket.Event.OnMessageReceived -> {
                         val text = event.message as Message.Text
-                        if (!text.value.contains("\"")) {
+                        if (_messages.value.isNotEmpty() &&
+                                _messages.value.last().message != text.value.replace("\"", "")) {
                             _messages.update { currentMessages ->
-                                currentMessages + ChatMessage(text.value, false)
+                                currentMessages + ChatMessage(text.value.replace("\"", ""), false)
                             }
                         }
                     }
@@ -59,8 +63,11 @@ class ChatViewModel2 @Inject constructor(
         val subscription = chatService.observeMessages()
             .subscribe(
                 { message ->
-                    _messages.update { currentMessages ->
-                        currentMessages + ChatMessage(message, true)
+                    if (_messages.value.isNotEmpty() &&
+                            _messages.value.last().message != message.replace("\"", "")) {
+                        _messages.update { currentMessages ->
+                            currentMessages + ChatMessage(message.replace("\"", ""), false)
+                        }
                     }
                 },
                 { error ->
